@@ -1,30 +1,32 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
+
+const (
+	dbUser     = "postgres"
+	dbPassword = "postgres"
+	dbName     = "calendar-app"
+)
 
 func main() {
 	// register handlers
-	http.HandleFunc("/", root)
+	http.HandleFunc("/", info(authenticate(root)))
 	http.HandleFunc("/login", login)
-	http.HandleFunc("/show", show)
-	http.HandleFunc("/create", create)
+	http.HandleFunc("/show", info(authenticate(show)))
+	http.HandleFunc("/create", info(authenticate(create)))
 
 	// start serving
-	http.ListenAndServe("localhost:80", nil)
+	http.ListenAndServe(":8080", nil)
 }
 
-func root(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func login(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func show(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func create(w http.ResponseWriter, r *http.Request) {
-
+// Info shows a basic information of where the request comes from..
+func info(pass http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("[INFO] Requst incoming: remote=%s, url=%s, method=%s\n",
+			r.RemoteAddr, r.URL.String(), r.Method)
+		pass(w, r)
+	}
 }
